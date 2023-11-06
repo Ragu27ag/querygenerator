@@ -1,0 +1,39 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.input-div {
+  margin-top: 10px;
+}
+
+.input {
+  height: 30px;
+}
+
+#collist {
+  margin-top: 15px;
+  border: 1px solid grey;
+  min-height: 300px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.collist-div {
+  margin: 5px;
+}
+
+.button-div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.column-button {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
