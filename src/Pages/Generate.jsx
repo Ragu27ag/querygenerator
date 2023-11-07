@@ -129,7 +129,7 @@ const Generate = () => {
       link.click();
       console.log(res.data.type);
       Object.keys(formData).forEach((val) => (formData[val] = ""));
-      queryType("");
+      setqueryType("");
       handleClick();
       setMessage("Downloaded Successfully");
     } catch (error) {
