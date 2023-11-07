@@ -23,7 +23,18 @@ const MainHome = () => {
   return (
     <>
       {load ? (
-        <Loader />
+        <Box
+          sx={{
+            height: "100vh",
+            width: "100vw",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <Loader />
+        </Box>
       ) : (
         <>
           {" "}

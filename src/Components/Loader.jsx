@@ -7,7 +7,7 @@ const Loader = () => {
     <div>
       {" "}
       <Box sx={{ display: "flex" }}>
-        <CircularProgress />
+        <CircularProgress color="secondary" size="8rem" />
       </Box>
     </div>
   );
