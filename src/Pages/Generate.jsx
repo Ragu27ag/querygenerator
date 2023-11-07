@@ -18,6 +18,12 @@ const Generate = () => {
 
   const [open, setOpen] = React.useState(false);
 
+  const [formData, setFromData] = React.useState({
+    tname: "",
+    cols1: "",
+    vals1: "",
+  });
+
   const handleClick = () => {
     setOpen(true);
   };
@@ -49,10 +55,17 @@ const Generate = () => {
 
     console.log("dom", columns);
     let temp = [];
+    let rese = {};
     for (let i = columns; i <= columns; i++) {
       temp.push(`cols${i}+vals${i}`);
+      rese[`cols${i}`] = "";
+      rese[`vals${i}`] = "";
     }
     setCols([...cols, ...temp]);
+    setFromData({
+      ...formData,
+      ...rese,
+    });
     setColumns(columns + 1);
   };
 
@@ -61,41 +74,46 @@ const Generate = () => {
   // document.getElementById("butt")?.addEventListener("click", handleColumns());
 
   let handleSubmit = async (e) => {
-    let allow = true;
-    console.log("submit");
-    e.preventDefault();
+    try {
+      let allow = true;
+      console.log("submit");
+      e.preventDefault();
 
-    let obj = {};
+      let obj = {};
 
-    Array.from(e.target.elements).forEach((ele) => {
-      if (ele.nodeName === "INPUT") {
-        obj[ele.name] = ele.value;
+      Array.from(e.target.elements).forEach((ele) => {
+        if (ele.nodeName === "INPUT") {
+          obj[ele.name] = ele.value;
+        }
+      });
+      obj.type = queryType;
+      obj.colno = cols.length;
+      console.log(cols.length);
+      for (let i = 1; i <= cols.length; i++) {
+        console.log("for");
+        console.log("for", obj[`cols${i}`].split(",").length);
+        if (
+          obj[`cols${i}`].split(",").length !==
+          obj[`vals${i}`].split(",").length
+        ) {
+          // alert("columns and values mismatch");
+          setMessage("Columns and Values doesn't match");
+          handleClick();
+
+          allow = false;
+          break;
+        }
       }
-    });
-    obj.type = queryType;
-    obj.colno = cols.length;
-    console.log(cols.length);
-    for (let i = 1; i <= cols.length; i++) {
-      console.log("for");
-      console.log("for", obj[`cols${i}`].split(",").length);
-      if (
-        obj[`cols${i}`].split(",").length !== obj[`vals${i}`].split(",").length
-      ) {
-        // alert("columns and values mismatch");
-        setMessage("Columns and Values doesn't match");
-        handleClick();
+      console.log(obj);
+      console.log(allow);
 
-        allow = false;
-        break;
+      if (allow) {
+        setTname(obj.tname);
+        let { data } = await axiosres.post("/query", obj);
+        if (data === "Inserted Successfully") showSubmit(true);
       }
-    }
-    console.log(obj);
-    console.log(allow);
-
-    if (allow) {
-      setTname(obj.tname);
-      let { data } = await axiosres.post("/query", obj);
-      if (data === "Inserted Successfully") showSubmit(true);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -110,6 +128,8 @@ const Generate = () => {
       link.download = `${tname}.txt`;
       link.click();
       console.log(res.data.type);
+      Object.keys(formData).forEach((val) => (formData[val] = ""));
+      queryType("");
       handleClick();
       setMessage("Downloaded Successfully");
     } catch (error) {
@@ -117,11 +137,26 @@ const Generate = () => {
     }
   };
 
+  const handleFormChange = (e) => {
+    setFromData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  console.log(formData);
+
   return (
     <div className="main">
       <div className="column-button">
         {" "}
-        <Button variant="contained" onClick={() => handleColumns()}>
+        <Button
+          sx={{
+            backgroundColor: "#f64c72",
+          }}
+          variant="contained"
+          onClick={() => handleColumns()}
+        >
           Add Columns
         </Button>
       </div>
@@ -136,7 +171,12 @@ const Generate = () => {
       <form className="mainform" id="mainform" onSubmit={handleSubmit}>
         <div>
           <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel id="demo-simple-select-standard-label">
+            <InputLabel
+              sx={{
+                color: "#f64c72",
+              }}
+              id="demo-simple-select-standard-label"
+            >
               QueryType
             </InputLabel>
             <Select
@@ -147,13 +187,18 @@ const Generate = () => {
               label="queryType"
               name="querytype"
               required
+              sx={{
+                color: "#f64c72",
+              }}
             >
               <MenuItem value="">
                 <em>None</em>
               </MenuItem>
-              <MenuItem value={"insert"}>Insert</MenuItem>
-              <MenuItem value={"select"}>Select</MenuItem>
-              <MenuItem value={"delete"}>Delete</MenuItem>
+              <MenuItem sx={{ color: "#f64c72" }} value={"insert"}>
+                Insert
+              </MenuItem>
+              {/* <MenuItem value={"select"}>Select</MenuItem>
+              <MenuItem value={"delete"}>Delete</MenuItem> */}
             </Select>
           </FormControl>
         </div>
@@ -165,6 +210,8 @@ const Generate = () => {
             name="tname"
             placeholder="Enter table name"
             className="input"
+            value={formData.tname}
+            onChange={handleFormChange}
             required
           />
           <br />
@@ -178,27 +225,53 @@ const Generate = () => {
         <div id="collist">
           {cols.map((va, i) => (
             <div className="collist-div">
-              <label htmlFor="">Columns :</label>{" "}
-              <input required key={i} name={va.slice(0, va.indexOf("+"))} />
-              &nbsp;&nbsp;
-              <label htmlFor="">Values :</label>{" "}
-              <input
-                required
-                key={i + 2}
-                name={va.slice(va.indexOf("+") + 1)}
-              />
+              <div>
+                <label htmlFor="column">Columns :</label>{" "}
+                <input
+                  id="column"
+                  required
+                  key={i}
+                  name={va.slice(0, va.indexOf("+"))}
+                  value={formData?.va?.slice(0, va.indexOf("+"))}
+                  onChange={handleFormChange}
+                />
+              </div>
+              <div>
+                <label htmlFor="value">Values :</label>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input
+                  id="value"
+                  required
+                  key={i + 2}
+                  name={va.slice(va.indexOf("+") + 1)}
+                  value={formData?.va?.slice(va.indexOf("+") + 1)}
+                  onChange={handleFormChange}
+                />
+              </div>
               <br />
             </div>
           ))}
         </div>
         <br />
         <div className="button-div">
-          <Button variant="contained" type="submit">
+          <Button
+            sx={{
+              backgroundColor: "#f64c72",
+            }}
+            variant="contained"
+            type="submit"
+          >
             Submit
           </Button>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           {submit && (
-            <Button variant="contained" onClick={handleDownload}>
+            <Button
+              sx={{
+                backgroundColor: "#f64c72",
+              }}
+              variant="contained"
+              onClick={handleDownload}
+            >
               Download
             </Button>
           )}
